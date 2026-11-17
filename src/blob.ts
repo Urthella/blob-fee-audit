@@ -40,6 +40,12 @@ export const blobBaseFee = (excessBlobGas: bigint, schedule: Schedule) => fakeEx
 /** Whether EIP-7918's reserve price binds after this block: its execution base fee prices a blob above its blob fee. */
 export const reservePriceBinds = (parent: Header, schedule: Schedule) => BLOB_BASE_COST * parent.baseFeePerGas > GAS_PER_BLOB * blobBaseFee(parent.excessBlobGas, schedule);
 
+/** The excess blob gas of the block after `parent` under EIP-4844's rule as it was before Osaka, with no reserve price. */
+export function nextExcessBlobGasBeforeOsaka(parent: Header, schedule: Schedule): bigint {
+  const target = BigInt(schedule.target) * GAS_PER_BLOB;
+  return parent.excessBlobGas + parent.blobGasUsed < target ? 0n : parent.excessBlobGas + parent.blobGasUsed - target;
+}
+
 /**
  * The excess blob gas of the block after `parent`. Below the target it resets to 0. Otherwise it
  * grows by what the parent used beyond the target, unless the reserve price binds: then it grows

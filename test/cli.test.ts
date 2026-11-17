@@ -169,3 +169,13 @@ test("bad arguments and an unreachable node exit 2", async () => {
   );
   assert.equal(closed.code, 2, closed.out);
 });
+
+test("--counterfactual adds the replay, in text and JSON", async () => {
+  const text = await run("--blocks", "60", "--counterfactual");
+  assert.equal(text.code, 0, text.out);
+  assert.match(text.out, /without EIP-7918, the same blobs would have taken the fee from [\d,]+ wei at block \d+ (down to the 1-wei minimum by block \d+, \d+ blocks in|to [\d,]+ wei by block \d+); with it, the fee was [\d,]+ wei at block \d+/);
+  const json = JSON.parse((await run("--blocks", "60", "--counterfactual", "--json")).out);
+  assert.equal(json.counterfactual.from, Number(headers.at(-61)!.number));
+  const plain = JSON.parse((await run("--blocks", "60", "--json")).out);
+  assert.equal(plain.counterfactual, undefined);
+});

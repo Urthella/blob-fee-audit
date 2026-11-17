@@ -61,3 +61,10 @@ test("the reserve price binds exactly when 8192 × base fee exceeds 131072 × bl
   assert.ok(!reservePriceBinds(parent(atParity), BPO2), "equal isn't above");
   assert.ok(reservePriceBinds(parent(atParity + 1n), BPO2));
 });
+
+test("before Osaka, the excess only follows use against the target, with no reserve price", async () => {
+  const { nextExcessBlobGasBeforeOsaka } = await import("../src/blob.ts");
+  const rich = header(1_000, 6, 10n ** 12n); // the reserve price would bind after Osaka
+  assert.equal(nextExcessBlobGasBeforeOsaka(rich, BPO2), (1_000n - 8n) * GAS_PER_BLOB);
+  assert.equal(nextExcessBlobGasBeforeOsaka(header(3, 6, 1n), BPO2), 0n, "below the target it resets");
+});
