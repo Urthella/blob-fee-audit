@@ -51,6 +51,16 @@ node src/main.ts --blocks 1000
 - `--schedule TARGET,MAX,FRACTION` gives the blob schedule by hand, for a node without
   `eth_config`.
 - `--json` prints the report as JSON.
+- `--counterfactual` replays the same blocks under the rule from before Osaka. It starts from
+  the first audited block's parent and its real excess, and follows each block's real blob use
+  with no reserve price. Over the same 1,000 blocks:
+
+  ```text
+    without EIP-7918, the same blobs would have taken the fee from 7,675,330 wei at block 26432886 down to the 1-wei minimum by block 26433051, 165 blocks in; with it, the fee was 9,392,415 wei at block 26433886
+  ```
+
+  In other words, without the reserve price the blob fee would have collapsed in about half an
+  hour of blocks.
 
 Exit codes: 0 when every check holds, 1 when a header or `eth_blobBaseFee` disagrees with the
 rules, and 2 on errors.
@@ -82,6 +92,10 @@ rules, and 2 on errors.
   - the pre-Osaka rule gets some of them wrong, all under the reserve price, so these blocks
     really exercise EIP-7918;
   - the saved `eth_blobBaseFee` is its block's fee.
+- **The replay**, with `--counterfactual`:
+  - over the real blocks, it matches a replay written out in the test with the old rule in full;
+  - on a quiet synthetic chain, it notes the block where the fee hits 1 wei, worked out by hand;
+  - it starts from the first parent's excess, not its child's.
 - **End to end:** the CLI runs against a fake node answering batches from those blocks:
   - the counts match ones worked out in the test;
   - a tampered header fails for itself and its child;
@@ -90,8 +104,8 @@ rules, and 2 on errors.
   - without `eth_config`, it points to `--schedule`, and Pectra's schedule doesn't fit these
     blocks;
   - a 429 is retried, and bad arguments and an unreachable node exit 2.
-- **Mutation testing:** twenty deliberate bugs were planted one at a time, and the tests caught
-  every one.
+- **Mutation testing:** twenty-five deliberate bugs were planted one at a time, and the tests
+  caught every one.
 - **Live:** 1,000 of 1,000 mainnet blocks reconciled on 2026-11-17.
 
 ## Limits
