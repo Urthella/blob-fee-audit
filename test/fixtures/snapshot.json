@@ -1,0 +1,11 @@
+{
+ "block": "0x193592e",
+ "fee": "0x8c2337",
+ "header": {
+  "number": "0x193592e",
+  "timestamp": "0x6afc1cc3",
+  "baseFeePerGas": "0x8a1d964",
+  "blobGasUsed": "0x0",
+  "excessBlobGas": "0xb2a953a"
+ }
+}
